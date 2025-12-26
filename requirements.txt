@@ -1,0 +1,18 @@
+# Update requirements.txt with the new content
+# Voice Authentication Only
+speechbrain==0.5.16
+torchaudio==2.1.0
+sounddevice==0.4.6
+numpy==1.24.3
+scipy==1.11.3
+torch==2.1.0
+pyyaml==6.0.1
+requests==2.31.0
+huggingface-hub==0.20.3
+pvporcupine==3.0.0
+
+# Speech-to-Text
+openai-whisper==20231117
+
+# UI/Animation
+PyQt5==5.15.10

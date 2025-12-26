@@ -1,0 +1,16 @@
+# Voice profiles
+data/
+*.pkl
+
+# Models
+models/
+pretrained_models/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+.env
