@@ -68,6 +68,14 @@ class MacHandler:
 
     def _file_open(self, query: str) -> str:
         try:
+            # Try as application first, fall back to path
+            result = subprocess.run(
+                ['open', '-a', query],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                return f"Opening '{query}'."
+            # Fall back to opening as file/URL
             subprocess.Popen(['open', query])
             return f"Opening '{query}'."
         except Exception as e:

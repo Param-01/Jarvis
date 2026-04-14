@@ -114,6 +114,10 @@ class JarvisAnimation(QWidget):
         self.fade_animation.stop()
         self.fade_animation.setStartValue(self._glow_opacity)
         self.fade_animation.setEndValue(0.0)
+        try:
+            self.fade_animation.finished.disconnect(self._on_fade_complete)
+        except TypeError:
+            pass
         self.fade_animation.finished.connect(self._on_fade_complete)
         self.fade_animation.start()
 

@@ -68,6 +68,10 @@ class Jarvis:
             return
 
         print("✓ Authenticated")
+
+        # Stop wake word stream to free the mic for STT
+        self.wake_word.stop()
+
         self.tts.speak_async("Yes?")
 
         # Listen for command with audio-reactive animation
@@ -91,6 +95,9 @@ class Jarvis:
 
         self.animation.hide()
         self.animation.process_events()
+
+        # Restart wake word listening
+        self.wake_word.start()
 
     def process_command(self, command: str) -> str:
         print(f"\n📝 Command: {command}")

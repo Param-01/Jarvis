@@ -48,7 +48,7 @@ VALID_INTENTS = {'file_search', 'file_open', 'system_info', 'web_search', 'gener
 # Regex fallback patterns
 _PATTERNS = [
     (re.compile(r'\b(battery|memory|ram|cpu|disk|storage|charging)\b', re.I), 'system_info'),
-    (re.compile(r'\b(find|search|locate|where is|where\'?s)\b.*(file|document|folder|pdf|note)', re.I), 'file_search'),
+    (re.compile(r'\b(find|search|locate|where is|where\'?s)\b', re.I), 'file_search'),
     (re.compile(r'\b(open|launch|start)\b', re.I), 'file_open'),
     (re.compile(r'\b(weather|news|who|what time|price|score|latest)\b', re.I), 'web_search'),
 ]
@@ -75,6 +75,8 @@ class CommandProcessor:
         if intent == 'file_search':
             # Extract the search term (everything after "find"/"search for" etc.)
             query = re.sub(r'^.*?\b(find|search|locate|where is|where\'?s)\b\s*', '', command, flags=re.I).strip()
+            # Strip filler words that hurt mdfind
+            query = re.sub(r'^(my|the|a|an)\s+', '', query, flags=re.I).strip()
             query = query or command
             return self.mac_handler.handle('file_search', query)
 

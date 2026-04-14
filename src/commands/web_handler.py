@@ -31,7 +31,7 @@ class WebHandler:
 
     def _search(self, query: str) -> list:
         try:
-            from duckduckgo_search import DDGS
+            from ddgs import DDGS
             with DDGS() as ddgs:
                 return list(ddgs.text(query, max_results=self.max_results))
         except ImportError:

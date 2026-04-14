@@ -8,7 +8,7 @@ torch==2.1.0
 pyyaml==6.0.1
 requests==2.31.0
 huggingface-hub==0.20.3
-pvporcupine==3.0.0
+pvporcupine>=3.0.0
 
 # Speech-to-Text
 openai-whisper==20231117
@@ -17,6 +17,6 @@ openai-whisper==20231117
 PyQt5==5.15.10
 
 # Command processing & web
-duckduckgo-search>=6.2.0
+ddgs>=9.0.0
 psutil>=5.9.0
 python-dotenv>=1.0.0
