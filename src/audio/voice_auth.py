@@ -1,3 +1,4 @@
+# src/audio/voice_auth.py
 """
 Voice Authentication Module
 Only recognizes enrolled user's voice
@@ -41,11 +42,33 @@ class VoiceAuth:
         sr = self.cfg['sample_rate']
         
         print(f"🎤 Recording for {duration} seconds...")
-        audio = sd.rec(int(duration * sr), samplerate=sr, channels=1, dtype='float32')
-        sd.wait()
-        print("✓ Recording complete")
         
-        return audio.flatten()
+        # Wait a bit before trying to record
+        import time
+        time.sleep(0.3)
+        
+        try:
+            audio = sd.rec(int(duration * sr), samplerate=sr, channels=1, dtype='float32')
+            sd.wait()
+            print("✓ Recording complete")
+            return audio.flatten()
+        except Exception as e:
+            print(f"❌ Recording error: {e}")
+            print("Trying to reset audio device...")
+            
+            # Try to reset by querying devices
+            try:
+                sd.query_devices()
+                time.sleep(0.5)
+                
+                # Try again
+                audio = sd.rec(int(duration * sr), samplerate=sr, channels=1, dtype='float32')
+                sd.wait()
+                print("✓ Recording complete (after reset)")
+                return audio.flatten()
+            except Exception as e2:
+                print(f"❌ Still failed: {e2}")
+                raise
     
     def get_embedding(self, audio):
         """Extract voice embedding from audio"""
@@ -98,10 +121,9 @@ class VoiceAuth:
         ]
         
         max_similarity = np.max(similarities)
-        distance = 1 - max_similarity
-        
-        is_match = distance < self.cfg['threshold']
-        
+
+        is_match = max_similarity >= self.cfg['threshold']
+
         print(f"\nSimilarity: {max_similarity:.3f} | Threshold: {self.cfg['threshold']}")
         
         if is_match:

@@ -1,15 +1,38 @@
 voice_auth:
-  threshold: 0.50
+  threshold: 0.40
   enrollment_samples: 3
   record_duration: 5
   sample_rate: 16000
 
 wake_word:
   keyword: "jarvis"  # Options: jarvis, alexa, computer, hey google, ok google, porcupine
-  sensitivity: 0.5   # 0.0 to 1.0 (higher = more sensitive but more false positives)
+  sensitivity: 0.4   # 0.0 to 1.0 (higher = more sensitive but more false positives)
 
 speech_to_text:
   model_size: "base"  # tiny, base, small, medium, large
   language: "en"
   command_duration: 5
   sample_rate: 16000
+
+tts:
+  voice: "Alex"
+  rate: 200
+  enabled: true
+
+ollama:
+  base_url: "http://localhost:11434"
+  model: "llama3.2"
+  timeout: 30
+  temperature: 0.7
+
+command_processor:
+  general_system_prompt: "You are JARVIS, a concise personal AI assistant for Mac. Answer in 1-2 sentences."
+
+web_search:
+  max_results: 3
+  system_prompt: "Answer the question directly in 1-2 sentences using these search results. Do not cite sources."
+
+mac_handler:
+  mdfind_max_results: 5
+  file_read_max_chars: 3000
+  text_extensions: [".txt", ".md", ".py", ".js", ".ts", ".json", ".yaml", ".yml", ".csv", ".log", ".sh"]

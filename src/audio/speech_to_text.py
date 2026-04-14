@@ -42,24 +42,57 @@ class SpeechToText:
             print(f"❌ Error loading Whisper: {e}")
             raise
     
-    def record_command(self, duration=None):
-        """Record audio command from microphone"""
+    def record_command(self, duration=None, audio_callback=None, event_pump=None):
+        """Record audio command from microphone.
+
+        audio_callback(level, freq) — called per chunk with amplitude and dominant freq
+        event_pump()               — called per chunk to keep UI alive (e.g. Qt processEvents)
+        """
         duration = duration or self.record_duration
-        
+
         print(f"🎤 Listening for {duration} seconds... Speak now!")
-        
-        # Record audio
-        audio = sd.rec(
-            int(duration * self.sample_rate),
+
+        frames = []
+
+        def _on_audio(indata, frame_count, time_info, status):
+            chunk = indata[:, 0].copy()
+            frames.append(chunk)
+
+            if audio_callback:
+                # Amplitude (RMS, scaled to ~0-1 for normal speech)
+                level = float(np.sqrt(np.mean(chunk ** 2))) * 8
+                level = min(level, 1.0)
+
+                # Dominant frequency via FFT (voice range 80–1000 Hz)
+                fft_mag = np.abs(np.fft.rfft(chunk))
+                freqs = np.fft.rfftfreq(len(chunk), 1.0 / self.sample_rate)
+                voice_mask = (freqs >= 80) & (freqs <= 1000)
+                if voice_mask.any() and fft_mag[voice_mask].max() > 0.001:
+                    dominant_freq = float(freqs[voice_mask][np.argmax(fft_mag[voice_mask])])
+                else:
+                    dominant_freq = 0.0
+
+                audio_callback(level, dominant_freq)
+
+        import time
+        with sd.InputStream(
             samplerate=self.sample_rate,
             channels=1,
-            dtype='float32'
-        )
-        sd.wait()
-        
+            dtype='float32',
+            callback=_on_audio,
+            blocksize=1024
+        ):
+            end_time = time.time() + duration
+            while time.time() < end_time:
+                if event_pump:
+                    event_pump()
+                time.sleep(0.03)
+
         print("✓ Recording complete")
-        
-        return audio.flatten()
+
+        if frames:
+            return np.concatenate(frames)
+        return np.array([], dtype=np.float32)
     
     def transcribe_audio(self, audio):
         """Transcribe audio to text"""
@@ -100,9 +133,9 @@ class SpeechToText:
             print(f"❌ Transcription error: {e}")
             return ""
     
-    def listen_for_command(self, duration=None):
+    def listen_for_command(self, duration=None, audio_callback=None, event_pump=None):
         """Record and transcribe command in one go"""
-        audio = self.record_command(duration)
+        audio = self.record_command(duration, audio_callback=audio_callback, event_pump=event_pump)
         text = self.transcribe_audio(audio)
         return text
     
